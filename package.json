@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "dev": "node dev-server.js",
+    "ingest": "node scripts/ingest-portfolio-knowledge.mjs",
+    "ingest:upload": "node scripts/ingest-portfolio-knowledge.mjs --upload"
+  }
+}
