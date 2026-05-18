@@ -9,6 +9,21 @@
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="chat.css" />
+  <script>
+    // Apply persisted theme + accent before React mounts to prevent a flash.
+    try {
+      var raw = localStorage.getItem("ousama:tweaks");
+      if (raw) {
+        var t = JSON.parse(raw);
+        if (t && typeof t.dark === "boolean") {
+          document.documentElement.dataset.theme = t.dark ? "dark" : "light";
+        }
+        if (t && typeof t.accent === "string") {
+          document.documentElement.style.setProperty("--accent", t.accent);
+        }
+      }
+    } catch (e) {}
+  </script>
 </head>
 <body>
   <div id="root"></div>

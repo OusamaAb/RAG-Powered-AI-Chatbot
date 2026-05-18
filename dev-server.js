@@ -19,6 +19,9 @@ const PUBLIC_FILES = new Set([
   "/profile.js",
   "/chatbot.jsx",
   "/shared/tweaks-panel.jsx",
+  "/assets/Ousama Portfolio Picture.jpg",
+  "/assets/Ousama Ai pic.png",
+  "/assets/Ousama_Alabdullah_Resume_May2026 (1).pdf",
 ]);
 
 const CONTENT_TYPES = {
@@ -26,6 +29,13 @@ const CONTENT_TYPES = {
   ".css": "text/css; charset=utf-8",
   ".js": "application/javascript; charset=utf-8",
   ".jsx": "text/babel; charset=utf-8",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".png": "image/png",
+  ".webp": "image/webp",
+  ".gif": "image/gif",
+  ".svg": "image/svg+xml",
+  ".pdf": "application/pdf",
 };
 
 function send(res, statusCode, body, headers = {}) {

@@ -3,7 +3,12 @@
   display: flex; flex-direction: column;
   padding: 0;
   overflow: hidden;
-  min-height: 480px;
+  min-height: 420px;
+  max-height: calc(100vh - 120px);
+}
+@media (max-width: 979px) {
+  /* Single-column hero on smaller widths: no sibling to stretch to. */
+  .hero-chat { height: clamp(420px, calc(100vh - 200px), 620px); }
 }
 .hc-head {
   display: flex; align-items: center; justify-content: space-between;
@@ -51,6 +56,15 @@
 
 .hc-msg { display: flex; gap: 10px; max-width: 100%; }
 .hc-msg.user { justify-content: flex-end; }
+.hc-msg-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 86%;
+  min-width: 0;
+}
+.hc-msg.user .hc-msg-stack { align-items: flex-end; }
+.hc-msg.assistant .hc-msg-stack { align-items: flex-start; }
 .hc-msg .ava, .hc-ava-slot {
   flex-shrink: 0;
   width: 28px; height: 28px;
@@ -70,7 +84,7 @@
   line-height: 1.55;
   padding: 11px 15px;
   border-radius: 14px;
-  max-width: 86%;
+  max-width: 100%;
   white-space: pre-wrap;
   word-wrap: break-word;
 }
@@ -89,22 +103,70 @@
   border-top-right-radius: 4px;
   font-weight: 500;
 }
-
+.hc-followups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: 100%;
+}
+.hc-followups button {
+  appearance: none;
+  border: 0.5px solid var(--rule-strong);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  line-height: 1.35;
+  letter-spacing: 0;
+  max-width: min(100%, 260px);
+  min-height: 32px;
+  padding: 7px 9px;
+  text-align: left;
+  white-space: normal;
+  transition: color .2s ease, border-color .2s ease, background .2s ease, transform .2s ease;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
+}
+.hc-followups button:hover:not(:disabled) {
+  color: var(--ink);
+  border-color: var(--accent);
+  background: var(--panel-2);
+  transform: translateY(-1px);
+}
+.hc-followups button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
 .hc-starters {
   padding: 0 22px 14px;
-  display: flex; flex-wrap: wrap; gap: 6px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  max-height: 190px;
+  overflow-y: auto;
 }
 .hc-starters button {
   font-family: "JetBrains Mono", monospace;
   font-size: 11px;
-  padding: 8px 12px;
+  line-height: 1.35;
+  min-height: 42px;
+  height: auto;
+  padding: 8px 10px;
   border: 0.5px solid var(--rule-strong);
   border-radius: 8px;
   background: transparent;
   color: var(--ink-soft);
   cursor: pointer;
   transition: all .2s ease;
-  letter-spacing: 0.01em;
+  letter-spacing: 0;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
 }
 .hc-starters button {
   transition: color .2s ease, border-color .2s ease, background .2s ease, transform .2s ease;
@@ -114,6 +176,14 @@
   border-color: var(--accent);
   background: var(--panel-2);
   transform: translateY(-2px);
+}
+.hc-starters button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  transform: none;
+}
+@media (max-width: 560px) {
+  .hc-starters { grid-template-columns: 1fr; }
 }
 
 .hc-input {

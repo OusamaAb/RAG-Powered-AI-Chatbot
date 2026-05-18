@@ -85,7 +85,14 @@ body::before {
   font-style: italic;
   color: var(--bg);
   font-size: 16px;
+  overflow: hidden;
   transition: transform .4s cubic-bezier(.5,0,.3,1.4);
+}
+.brand-mark img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 50%;
 }
 .brand:hover .brand-mark { transform: rotate(360deg) scale(1.1); }
 .top nav {
@@ -323,7 +330,7 @@ body::before {
   border-radius: 14px;
   cursor: pointer;
   color: var(--ink-soft);
-  transition: background .2s ease, color .2s ease;
+  transition: background .2s ease, color .2s ease, transform .2s ease, border-color .2s ease;
   border: 0.5px solid transparent;
 }
 .proj-list-item:hover {
@@ -434,10 +441,15 @@ body::before {
   border-color: color-mix(in oklab, var(--accent) 45%, transparent);
   background: color-mix(in oklab, var(--panel) 70%, var(--accent) 6%);
 }
+.proj-detail-card .pd-links {
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-self: flex-start;
+}
 .proj-detail-card .pd-link {
   display: inline-flex; align-items: center; gap: 8px;
-  margin-top: auto;
-  align-self: flex-start;
   font-family: "JetBrains Mono", monospace;
   font-size: 12px;
   letter-spacing: 0.04em;
@@ -638,6 +650,217 @@ body::before {
   text-transform: uppercase;
 }
 .edu-courses { display: flex; flex-wrap: wrap; gap: 6px; }
+.edu-course {
+  font: inherit;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  cursor: pointer;
+}
+.edu-course:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ───── Course detail modal */
+.course-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: transparent;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 24px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  animation: course-fade .18s ease-out;
+}
+@keyframes course-fade { from { opacity: 0; } to { opacity: 1; } }
+.course-modal {
+  position: relative;
+  width: min(640px, 100%);
+  margin: auto;
+  background: var(--panel);
+  border: 0.5px solid var(--rule-strong);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  padding: 28px 28px 24px;
+  animation: course-pop .22s cubic-bezier(.2,.7,.3,1.1);
+}
+@keyframes course-pop {
+  from { opacity: 0; transform: translateY(8px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.course-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  font-size: 26px;
+  line-height: 1;
+  color: var(--ink-soft);
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 10px;
+  transition: color .18s ease, background .18s ease;
+}
+.course-close:hover { color: var(--ink); background: var(--panel-2); }
+.course-head { margin-bottom: 18px; padding-right: 28px; }
+.course-head h3 {
+  font-family: "Instrument Serif", serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 30px;
+  letter-spacing: -0.02em;
+  margin: 6px 0 8px;
+}
+.course-blurb {
+  color: var(--ink-soft);
+  font-size: 14.5px;
+  line-height: 1.55;
+  margin: 0;
+}
+.course-sections { display: flex; flex-direction: column; gap: 18px; }
+.course-sections section { display: flex; flex-direction: column; gap: 8px; }
+.cs-title {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.course-sections ul {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--ink-soft);
+  font-size: 14px;
+  line-height: 1.55;
+}
+.course-sections li::marker { color: var(--accent); }
+.cs-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+@media (max-width: 600px) {
+  .course-modal { padding: 22px 20px 20px; border-radius: 14px; }
+  .course-head h3 { font-size: 26px; }
+}
+
+/* ───── Resume button + PDF viewer modal */
+.resume-btn {
+  appearance: none;
+  margin-top: 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 24px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--accent);
+  color: var(--bg);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+  box-shadow: 0 8px 28px color-mix(in oklab, var(--accent) 28%, transparent);
+}
+.resume-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 36px color-mix(in oklab, var(--accent) 35%, transparent); }
+.resume-btn:active { transform: translateY(0); }
+.resume-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.resume-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: transparent;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: course-fade .18s ease-out;
+}
+.resume-modal {
+  position: relative;
+  width: min(960px, 100%);
+  height: min(92vh, 1100px);
+  background: var(--panel);
+  border: 0.5px solid var(--rule-strong);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: course-pop .22s cubic-bezier(.2,.7,.3,1.1);
+}
+.resume-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px 12px 20px;
+  border-bottom: 0.5px solid var(--rule);
+  background: var(--panel);
+  flex-wrap: wrap;
+}
+.resume-title {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.resume-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.resume-action {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  padding: 8px 12px;
+  border: 0.5px solid var(--rule-strong);
+  border-radius: 999px;
+  color: var(--ink);
+  transition: background .18s ease, color .18s ease, border-color .18s ease;
+}
+.resume-action:hover {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+.resume-close {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--ink-soft);
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: 10px;
+  transition: color .18s ease, background .18s ease;
+}
+.resume-close:hover { color: var(--ink); background: var(--panel-2); }
+.resume-frame {
+  flex: 1;
+  width: 100%;
+  border: 0;
+  background: #2a2a2a;
+}
+@media (max-width: 600px) {
+  .resume-modal { height: 92vh; border-radius: 14px; }
+  .resume-title { display: none; }
+  .resume-action { padding: 7px 10px; }
+}
 
 /* ───── Certs */
 .cert-grid {
@@ -763,13 +986,47 @@ footer {
   bottom: 18px;
   z-index: 60;
   width: min(240px, calc(100vw - 36px));
-  padding: 14px;
+  padding: 0;
   border: 0.5px solid var(--rule);
   border-radius: 14px;
   background: color-mix(in oklab, var(--panel) 92%, transparent);
   backdrop-filter: blur(10px);
   box-shadow: var(--shadow);
+  transition: width .2s ease;
 }
+.tweaks-panel.collapsed { width: auto; }
+.tweaks-toggle {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  width: 100%;
+  padding: 10px 14px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  color: var(--ink-soft);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-radius: 14px;
+  transition: color .2s ease, background .2s ease;
+}
+.tweaks-toggle:hover { color: var(--ink); background: color-mix(in oklab, var(--panel-2) 80%, transparent); }
+.tweaks-panel:not(.collapsed) .tweaks-toggle {
+  border-bottom: 0.5px solid var(--rule);
+  border-radius: 14px 14px 0 0;
+}
+.tweaks-chev {
+  font-size: 9px;
+  line-height: 1;
+  opacity: 0.7;
+  transition: transform .25s ease;
+}
+.tweaks-panel.collapsed .tweaks-chev { transform: rotate(180deg); }
+.tweaks-body { padding: 12px 14px 14px; }
 .tweak-section {
   font-family: "JetBrains Mono", monospace;
   font-size: 10px;

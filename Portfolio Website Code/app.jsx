@@ -30,7 +30,9 @@ function AppB() {
     <>
       <header className="top">
         <div className="brand">
-          <span className="brand-mark">O</span>
+          <span className="brand-mark">
+            <img src="/assets/Ousama%20Ai%20pic.png" alt="" />
+          </span>
           <span>Ousama Alabdullah</span>
         </div>
         <nav>

@@ -1,7 +1,22 @@
-const { useState: useStateTweaks } = React;
+const { useState: useStateTweaks, useEffect: useEffectTweaks } = React;
+
+const TWEAKS_STORAGE_KEY = "ousama:tweaks";
+const TWEAKS_COLLAPSED_KEY = "ousama:tweaks:collapsed";
 
 function useTweaks(defaults) {
-  const [values, setValues] = useStateTweaks(defaults);
+  const [values, setValues] = useStateTweaks(() => {
+    try {
+      const raw = localStorage.getItem(TWEAKS_STORAGE_KEY);
+      if (raw) return { ...defaults, ...JSON.parse(raw) };
+    } catch (e) {}
+    return defaults;
+  });
+
+  useEffectTweaks(() => {
+    try {
+      localStorage.setItem(TWEAKS_STORAGE_KEY, JSON.stringify(values));
+    } catch (e) {}
+  }, [values]);
 
   const setTweak = (key, value) => {
     setValues((current) => ({
@@ -14,9 +29,43 @@ function useTweaks(defaults) {
 }
 
 function TweaksPanel({ title, children }) {
+  const [collapsed, setCollapsed] = useStateTweaks(() => {
+    try {
+      return localStorage.getItem(TWEAKS_COLLAPSED_KEY) === "1";
+    } catch (e) {
+      return false;
+    }
+  });
+
+  useEffectTweaks(() => {
+    try {
+      localStorage.setItem(TWEAKS_COLLAPSED_KEY, collapsed ? "1" : "0");
+    } catch (e) {}
+  }, [collapsed]);
+
+  const label = title || "Tweaks";
+
   return (
-    <aside className="tweaks-panel" aria-label={title}>
-      {children}
+    <aside
+      className={"tweaks-panel" + (collapsed ? " collapsed" : "")}
+      aria-label={label}
+    >
+      <button
+        type="button"
+        className="tweaks-toggle"
+        onClick={() => setCollapsed((c) => !c)}
+        aria-expanded={!collapsed}
+        aria-controls="tweaks-body"
+        title={collapsed ? "Open tweaks" : "Minimize tweaks"}
+      >
+        <span>{label}</span>
+        <span className="tweaks-chev" aria-hidden="true">▾</span>
+      </button>
+      {!collapsed && (
+        <div id="tweaks-body" className="tweaks-body">
+          {children}
+        </div>
+      )}
     </aside>
   );
 }
