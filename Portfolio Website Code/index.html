@@ -24,6 +24,11 @@
       }
     } catch (e) {}
   </script>
+  <script>
+    if (window.location.hostname === "ousamaab.github.io") {
+      window.OUSAMA_CHAT_API_URL = "https://ousama-rag-chatbot-backend.onrender.com/api/chat";
+    }
+  </script>
 </head>
 <body>
   <div id="root"></div>

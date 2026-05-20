@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: ousama-rag-chatbot-backend
+    runtime: node
+    plan: free
+    buildCommand: npm install --omit=dev
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: OPENAI_EMBEDDING_MODEL
+        value: text-embedding-3-small
+      - key: OPENAI_CHAT_MODEL
+        value: gpt-5-mini
+      - key: ALLOWED_ORIGINS
+        value: https://ousamaab.github.io
+      - key: CHAT_API_REQUIRE_ORIGIN
+        value: "true"
+      - key: CHAT_RATE_LIMIT_BACKEND
+        value: supabase
+      - key: CHAT_RATE_LIMIT_WINDOW_MS
+        value: "60000"
+      - key: CHAT_RATE_LIMIT_MAX_REQUESTS
+        value: "8"
+      - key: CHAT_RATE_LIMIT_BLOCK_MS
+        value: "120000"
+      - key: CHAT_API_DEBUG_RESPONSE
+        value: "false"
