@@ -66,7 +66,7 @@ function AboutB() {
       <div className="panel-head">
         <div>
           <div className="kicker"><span className="marker">●</span> 01 — About</div>
-          <h2 className="panel-title">The human behind the code.</h2>
+          <h2 className="panel-title">The person behind the code.</h2>
         </div>
       </div>
       <div className="grid lead">
@@ -112,10 +112,45 @@ function NowB() {
   );
 }
 
+const PROJECT_CYCLE_MS = 7000;
+const PROJECT_PAUSE_MS = 30000;
+
 function ProjectsB() {
   const O = window.OUSAMA;
   const [activeId, setActiveId] = useStateBS(O.projects[0].id);
+  const [paused, setPaused] = useStateBS(false);
+  const [pauseTick, setPauseTick] = useStateBS(0);
+  const [cycleTick, setCycleTick] = useStateBS(0);
   const active = O.projects.find(p => p.id === activeId) || O.projects[0];
+
+  useEffectBS(() => {
+    if (paused) return undefined;
+    const t = window.setTimeout(() => {
+      const idx = O.projects.findIndex(p => p.id === activeId);
+      const nextIdx = (idx + 1) % O.projects.length;
+      setActiveId(O.projects[nextIdx].id);
+      setCycleTick(c => c + 1);
+    }, PROJECT_CYCLE_MS);
+    return () => window.clearTimeout(t);
+  }, [activeId, paused, cycleTick]);
+
+  useEffectBS(() => {
+    if (!paused) return undefined;
+    const t = window.setTimeout(() => {
+      setPaused(false);
+      setCycleTick(c => c + 1);
+    }, PROJECT_PAUSE_MS);
+    return () => window.clearTimeout(t);
+  }, [paused, pauseTick]);
+
+  const handleSelect = (id) => {
+    setPauseTick(t => t + 1);
+    setPaused(true);
+    if (id === activeId) return;
+    setActiveId(id);
+    setCycleTick(c => c + 1);
+  };
+
   return (
     <section id="projects" className="panel reveal" style={{ marginBottom: 24 }}>
       <div className="panel-head">
@@ -126,22 +161,37 @@ function ProjectsB() {
       </div>
       <div className="grid proj">
         <div className="proj-list">
-          {O.projects.map((p, i) => (
-            <button
-              key={p.id}
-              className="proj-list-item"
-              data-active={p.id === activeId ? "1" : "0"}
-              onClick={() => setActiveId(p.id)}
-            >
-              <div className="pli-row1">
-                <h4>{p.title}</h4>
-                <span className="num">№ {String(i + 1).padStart(2, "0")}</span>
-              </div>
-              <div className="pli-tag">{p.tag} · {p.year}</div>
-            </button>
-          ))}
+          {O.projects.map((p, i) => {
+            const isActive = p.id === activeId;
+            return (
+              <button
+                key={p.id}
+                className="proj-list-item"
+                data-active={isActive ? "1" : "0"}
+                onClick={() => handleSelect(p.id)}
+              >
+                <div className="pli-row1">
+                  <h4>{p.title}</h4>
+                  <span className="num">№ {String(i + 1).padStart(2, "0")}</span>
+                </div>
+                <div className="pli-tag">{p.tag} · {p.year}</div>
+                {isActive && !paused && (
+                  <span
+                    key={cycleTick}
+                    className="pli-progress"
+                    style={{ animationDuration: `${PROJECT_CYCLE_MS}ms` }}
+                    aria-hidden="true"
+                  />
+                )}
+              </button>
+            );
+          })}
         </div>
-        <article className="proj-detail-card" key={active.id}>
+        <article
+          key={active.id}
+          className="proj-detail-card"
+          aria-live="polite"
+        >
           <div className="pd-year">{active.year} · {active.tag}</div>
           <h3>{active.title}</h3>
           <p className="pd-blurb">{active.blurb}</p>
@@ -208,6 +258,56 @@ function EducationB() {
     };
   }, [activeCourse]);
 
+  const buildQuestion = (course, kind, item) => {
+    const label = `${course.code}, ${course.name}`;
+    if (kind === "theory") {
+      return `Can you go deeper on this concept from ${label}: ${item}`;
+    }
+    if (kind === "labs") {
+      return `Tell me more about ${item} (from ${label}).`;
+    }
+    if (kind === "projects") {
+      const colonAt = item.indexOf(":");
+      const name = colonAt > 0 && colonAt < 60 ? item.slice(0, colonAt).trim() : null;
+      if (name) {
+        return `Tell me more about Ousama's ${name} project from ${label}.`;
+      }
+      return `Tell me more about Ousama's project from ${label}.`;
+    }
+    return item;
+  };
+
+  const askAbout = (course, kind, item) => {
+    const question = buildQuestion(course, kind, item);
+    setActiveCourse(null);
+    window.setTimeout(() => {
+      window.dispatchEvent(new CustomEvent("ousama:ask", { detail: { question } }));
+      const chatEl = document.querySelector(".hero-chat");
+      if (chatEl) {
+        chatEl.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, 120);
+  };
+
+  const renderAskList = (kind, items) => (
+    <ul className="course-ask-list">
+      {items.map((item, i) => (
+        <li key={i}>
+          <button
+            type="button"
+            className="course-ask-item"
+            onClick={() => askAbout(activeCourse, kind, item)}
+            aria-label={`Ask the chatbot about: ${item}`}
+            title="Ask the chatbot about this"
+          >
+            <span className="ask-text">{item}</span>
+            <span className="ask-cta" aria-hidden="true">Ask AI →</span>
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+
   return (
     <section id="education" className="panel reveal" style={{ marginBottom: 24 }}>
       <div className="panel-head">
@@ -267,20 +367,22 @@ function EducationB() {
             <div className="course-sections">
               {activeCourse.theory && activeCourse.theory.length > 0 && (
                 <section>
-                  <div className="cs-title">Theory</div>
-                  <ul>{activeCourse.theory.map((t, i) => <li key={i}>{t}</li>)}</ul>
+                  <div className="cs-title">Theory · tap any topic to ask the chatbot</div>
+                  {renderAskList("theory", activeCourse.theory)}
                 </section>
               )}
               {activeCourse.labs && activeCourse.labs.length > 0 && (
                 <section>
-                  <div className="cs-title">Labs</div>
-                  <ul>{activeCourse.labs.map((t, i) => <li key={i}>{t}</li>)}</ul>
+                  <div className="cs-title">Labs · tap any lab to ask the chatbot</div>
+                  {renderAskList("labs", activeCourse.labs)}
                 </section>
               )}
               {activeCourse.projects && activeCourse.projects.length > 0 && (
                 <section>
-                  <div className="cs-title">{activeCourse.projects.length > 1 ? "Projects" : "Project"}</div>
-                  <ul>{activeCourse.projects.map((t, i) => <li key={i}>{t}</li>)}</ul>
+                  <div className="cs-title">
+                    {activeCourse.projects.length > 1 ? "Projects" : "Project"} · tap to ask the chatbot
+                  </div>
+                  {renderAskList("projects", activeCourse.projects)}
                 </section>
               )}
               {activeCourse.tools && activeCourse.tools.length > 0 && (
@@ -364,14 +466,17 @@ function ContactB() {
     };
   }, [showResume]);
 
+  const gmailComposeUrl =
+    "https://mail.google.com/mail/?view=cm&fs=1&to=" + encodeURIComponent(O.email);
+
   return (
     <section id="contact" className="panel contact-card reveal">
       <h2>Reach out.<br/>Let's <em>have a chat!</em></h2>
-      <a className="email" href={"mailto:" + O.email}>{O.email}</a>
+      <a className="email" href={gmailComposeUrl} target="_blank" rel="noreferrer">{O.email}</a>
       <div className="lines">
         <a href={O.github} target="_blank" rel="noreferrer">GitHub</a>
         <a href={O.linkedin} target="_blank" rel="noreferrer">LinkedIn</a>
-        <a href={"mailto:" + O.email}>Email →</a>
+        <a href={gmailComposeUrl} target="_blank" rel="noreferrer">Email →</a>
       </div>
       <button
         type="button"

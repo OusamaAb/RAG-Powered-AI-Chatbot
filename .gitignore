@@ -13,3 +13,6 @@ build/
 
 tmp/
 *.log
+
+# Private local deployment notes
+private-docs/2026-05-20-github-pages-backend-launch-plan.md

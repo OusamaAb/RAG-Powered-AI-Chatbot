@@ -10,6 +10,22 @@ function HeroChatB() {
   const scrollRef = useRefBC(null);
   const inputRef = useRefBC(null);
   const stickToBottom = useRefBC(true);
+  const sendRef = useRefBC(send);
+
+  useEffectBC(() => {
+    sendRef.current = send;
+  });
+
+  useEffectBC(() => {
+    const onAsk = (event) => {
+      const question = event?.detail?.question;
+      if (typeof question !== "string" || !question.trim()) return;
+      stickToBottom.current = true;
+      sendRef.current(question);
+    };
+    window.addEventListener("ousama:ask", onAsk);
+    return () => window.removeEventListener("ousama:ask", onAsk);
+  }, []);
 
   const handleBodyScroll = () => {
     const el = scrollRef.current;

@@ -25,6 +25,7 @@ The `projects/` folder should contain only personal projects.
 - `projects/document-scanner.md`
 - `projects/smart-parking-system.md`
 - `projects/football-pickems.md`
+- `projects/rag-portfolio-chatbot.md`
 
 ## Experience
 

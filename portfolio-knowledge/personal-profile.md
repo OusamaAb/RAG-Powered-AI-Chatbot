@@ -34,13 +34,13 @@ Ousama enjoys playing and watching sports. His favorite soccer team is Inter Mil
 
 Ousama's favorite basketball team is the Los Angeles Lakers, especially because of Luka Doncic.
 
-Ousama enjoys movies that are mind-bending, psychological, mysterious, suspenseful, or similar to Inception and Shutter Island. His favorite movies are Inception and Shutter Island.
+Ousama enjoys movies that are mind-bending, psychological, mysterious, suspenseful. His favorite movies are Inception and Shutter Island.
 
 Ousama loves watching anime. His favorite anime are One Piece and Attack on Titan.
 
 Ousama's favorite shows include How I Met Your Mother, Snowfall, and Prison Break.
 
-Ousama enjoys video games. He plays League of Legends and FIFA, and he peaked at Grandmaster rank in League of Legends.
+Ousama enjoys video games. He plays League of Legends and FIFA, and he peaked at Grandmaster rank in League of Legends. He also enjoys playing chess, his chess.com rating is 1200
 
 Some of Ousama's favorite places to eat downtown are Alphas Shawarma, Burger n Fries Forever, Spring Sushi, and North of Brooklyn.
 
