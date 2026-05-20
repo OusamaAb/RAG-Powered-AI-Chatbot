@@ -16,6 +16,9 @@ const MAX_ANSWER_CHARS = 500;
 const MAX_ANSWER_SENTENCES = 2;
 const MAX_FOLLOW_UP_QUESTIONS = 3;
 const MAX_BODY_BYTES = 4096;
+const CORS_ALLOWED_METHODS = "POST, OPTIONS";
+const CORS_ALLOWED_HEADERS = "Content-Type, X-Portfolio-Chat-Session";
+const CORS_MAX_AGE_SECONDS = 600;
 const DEFAULT_RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const DEFAULT_RATE_LIMIT_MAX_REQUESTS = 8;
 const DEFAULT_RATE_LIMIT_BLOCK_MS = 2 * 60 * 1000;
@@ -697,6 +700,37 @@ function isAllowedOrigin(req) {
   return allowedOrigins.has(origin);
 }
 
+function getCorsAllowedOrigin(req) {
+  const origin = req.headers.origin;
+
+  if (!origin) {
+    return null;
+  }
+
+  const allowedOrigins = new Set(parseCsvEnv("ALLOWED_ORIGINS"));
+  const requestOrigin = getRequestOrigin(req);
+
+  if (requestOrigin) {
+    allowedOrigins.add(requestOrigin);
+  }
+
+  return allowedOrigins.has(origin) ? origin : null;
+}
+
+function appendCorsHeaders(req, res) {
+  const allowedOrigin = getCorsAllowedOrigin(req);
+
+  if (!allowedOrigin) {
+    return;
+  }
+
+  res.setHeader("Access-Control-Allow-Origin", allowedOrigin);
+  res.setHeader("Access-Control-Allow-Methods", CORS_ALLOWED_METHODS);
+  res.setHeader("Access-Control-Allow-Headers", CORS_ALLOWED_HEADERS);
+  res.setHeader("Access-Control-Max-Age", String(CORS_MAX_AGE_SECONDS));
+  res.setHeader("Vary", "Origin");
+}
+
 function isTrustedIp(req) {
   const trustedIps = parseCsvEnv("TRUSTED_API_IPS");
 
@@ -717,9 +751,11 @@ function assertRequestAllowed(req) {
   const secFetchSite = String(req.headers["sec-fetch-site"] || "").toLowerCase();
 
   if (secFetchSite && !["same-origin", "same-site", "none"].includes(secFetchSite)) {
-    const error = new Error("Cross-site chat requests are not allowed.");
-    error.statusCode = 403;
-    throw error;
+    if (!isAllowedOrigin(req)) {
+      const error = new Error("Cross-site chat requests are not allowed.");
+      error.statusCode = 403;
+      throw error;
+    }
   }
 
   if (!isAllowedOrigin(req)) {
@@ -1754,8 +1790,23 @@ async function generateGroundedAnswer({ message, matches }) {
 loadLocalEnv();
 
 module.exports = async function handler(req, res) {
+  appendCorsHeaders(req, res);
+
+  if (req.method === "OPTIONS") {
+    if (!getCorsAllowedOrigin(req)) {
+      return sendJson(res, 403, {
+        error: "This chat API only accepts approved origins.",
+      });
+    }
+
+    appendSecurityHeaders(res);
+    res.statusCode = 204;
+    res.end();
+    return;
+  }
+
   if (req.method !== "POST") {
-    res.setHeader("Allow", "POST");
+    res.setHeader("Allow", CORS_ALLOWED_METHODS);
     return sendJson(res, 405, {
       error: "Method not allowed. Use POST.",
     });

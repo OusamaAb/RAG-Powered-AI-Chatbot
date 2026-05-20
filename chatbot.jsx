@@ -3,6 +3,7 @@ const { useEffect: useEffectChat, useState: useStateChat } = React;
 const CHAT_API_ERROR =
   "I could not reach the portfolio chat API. Start the local Node dev server and try again.";
 const CHAT_SESSION_STORAGE_KEY = "ousama_portfolio_chat_session";
+const CHAT_API_URL = window.OUSAMA_CHAT_API_URL || "/api/chat";
 
 const STARTER_QUESTIONS = [
   "Tell me a bit about Ousama.",
@@ -71,7 +72,7 @@ function useOusamaChat({ greeting }) {
     setPending(true);
 
     try {
-      const response = await fetch("/api/chat", {
+      const response = await fetch(CHAT_API_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

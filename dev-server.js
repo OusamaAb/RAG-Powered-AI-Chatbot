@@ -4,7 +4,7 @@ const path = require("node:path");
 const chatHandler = require("./api/chat.js");
 
 const PORT = Number(process.env.PORT || 3000);
-const HOST = process.env.HOST || "127.0.0.1";
+const HOST = process.env.HOST || (process.env.RENDER ? "0.0.0.0" : "127.0.0.1");
 const ROOT = __dirname;
 const INDEX_PATH = "/Portfolio%20Website%20Code/index.html";
 
@@ -98,6 +98,11 @@ async function handleApi(req, res) {
 }
 
 const server = http.createServer((req, res) => {
+  if (req.url === "/health" || req.url === "/healthz") {
+    sendJson(res, 200, { ok: true });
+    return;
+  }
+
   if (req.url.startsWith("/api/chat")) {
     handleApi(req, res);
     return;
